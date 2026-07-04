@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>極彩律診断</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@300;400;600;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }:root {--navy-deep: #060c1a;--navy-mid:  #0b1428;--navy-card: #0f1a30;--navy-card2: #111e36;--gold:      #c8a84a;--gold-dim:  rgba(200,168,74,0.30);--gold-line: rgba(200,168,74,0.22);--text:      #e8e4dc;--muted:     rgba(232,228,220,0.42);--moon-blue: #c0ccf0;--moon-dim:  rgba(190,205,255,0.35);--ink:       #060c1a;}body {background: var(--navy-deep);color: var(--text);font-family: 'Noto Sans JP', sans-serif;font-weight: 300;min-height: 100vh;overflow-x: hidden;}/* ===== 入力エリア ===== */.hero {background: linear-gradient(160deg, #0a1428 0%, #060c1a 100%);padding: 72px 24px 64px;text-align: center;position: relative;overflow: hidden;}.hero::before {content: '';position: absolute;top: -80px; left: 50%;transform: translateX(-50%);width: 600px; height: 320px;background: radial-gradient(ellipse, rgba(200,168,74,0.07) 0%, transparent 70%);pointer-events: none;}.hero-img {width: 100%;height: auto;display: block;margin: 0;border-radius: 0;}.hero-ornament {font-family: 'Cormorant Garamond', serif;font-style: italic;font-size: 11px;letter-spacing: 0.6em;color: var(--gold-dim);margin-bottom: 20px;display: block;}.hero-title {font-family: 'Shippori Mincho', serif;font-size: clamp(30px, 7vw, 46px);font-weight: 300;letter-spacing: 0.4em;line-height: 1.3;margin-bottom: 12px;background: linear-gradient(160deg, #e8e4dc 30%, #c8a84a 100%);-webkit-background-clip: text;-webkit-text-fill-color: transparent;background-clip: text;}.hero-sub {font-size: 11px;letter-spacing: 0.45em;color: var(--muted);margin-bottom: 48px;}.divider {width: 1px; height: 48px;background: linear-gradient(to bottom, transparent, var(--gold-dim), transparent);margin: 0 auto 48px;}/* 入力カード */.input-wrap {max-width: 400px;margin: 0 auto;}.field-label {font-size: 10px;letter-spacing: 0.45em;color: var(--gold);opacity: 0.7;margin-bottom: 16px;display: block;}.date-row {display: grid;grid-template-columns: 1fr 1fr 1fr;gap: 8px;margin-bottom: 8px;}.date-unit { display: flex; flex-direction: column; gap: 5px; }.unit-label { font-size: 9px; letter-spacing: 0.2em; color: var(--muted); text-align: center; }.sel-wrap { position: relative; }.sel-wrap::after {content: '▾';position: absolute; right: 10px; top: 50%;transform: translateY(-50%);color: var(--gold); font-size: 9px; pointer-events: none;}select {width: 100%;background: rgba(255,255,255,0.04);border: 1px solid rgba(200,168,74,0.2);color: var(--text);font-family: 'Noto Sans JP', sans-serif;font-weight: 300;font-size: 15px;padding: 13px 28px 13px 12px;appearance: none; outline: none; cursor: pointer;border-radius: 6px;transition: border-color 0.25s;}select:focus { border-color: rgba(200,168,74,0.5); }option { background: var(--navy-deep); }.input-hint {font-size: 12px; color: rgba(232,228,220,0.5);letter-spacing: 0.1em; margin: 8px 0 28px;text-align: center;}.btn-diagnose {width: 100%; padding: 16px;background: transparent;border: 1px solid var(--gold);color: var(--gold);font-family: 'Shippori Mincho', serif;font-size: 13px; letter-spacing: 0.6em;cursor: pointer; border-radius: 6px;transition: all 0.35s;position: relative; overflow: hidden;}.btn-diagnose::before {content: '';position: absolute; inset: 0;background: var(--gold);transform: scaleX(0); transform-origin: left;transition: transform 0.35s ease; z-index: 0;}.btn-diagnose:hover::before { transform: scaleX(1); }.btn-diagnose:hover { color: var(--ink); }.btn-diagnose span { position: relative; z-index: 1; }.error-msg {font-size: 11px; color: #c06060;text-align: center; margin-top: 10px;letter-spacing: 0.1em; display: none;}/* ===== 結果エリア ===== */#result { display: none; }/* 共通カードスタイル */.card {background: var(--navy-card);border: 1px solid var(--gold-line);border-radius: 16px;padding: 32px 24px;margin: 0 16px 12px;}.card + .card { margin-top: 0; }/* セクション共通 */.sec-block {padding: 16px 0;position: relative;}.sec-inner { max-width: 480px; margin: 0 auto; }/* セクション番号バッジ */.sec-badge {display: inline-flex;align-items: center;gap: 8px;font-size: 9px;letter-spacing: 0.4em;color: var(--gold);opacity: 0.8;margin-bottom: 6px;}.sec-badge-num {width: 18px; height: 18px;border: 1px solid var(--gold-dim);border-radius: 50%;display: inline-flex;align-items: center;justify-content: center;font-size: 9px;color: var(--gold);}/* ===== 導入文 ===== */.sec-intro {background: linear-gradient(160deg, #0a1428 0%, #060c1a 100%);padding: 56px 24px 40px;position: relative;}.sec-intro::before {content: '';position: absolute; top: 0; left: 0; right: 0; height: 1px;background: linear-gradient(to right, transparent, var(--gold-dim), transparent);}.intro-text {font-size: 15px; line-height: 2.6;color: rgba(232,228,220,0.88);letter-spacing: 0.08em;max-width: 460px; margin: 0 auto;}.intro-text p { margin-bottom: 1.4em; }.intro-text p:last-child { margin-bottom: 0; }.intro-text strong {color: var(--gold);font-weight: 400;letter-spacing: 0.15em;}/* ===== 極彩律セクション（主役） ===== */.sec-gokusai {background: linear-gradient(180deg, #0a1428 0%, #060c1a 100%);padding: 48px 0 32px;position: relative;overflow: hidden;}.sec-gokusai::before {content: '';position: absolute; top: 0; left: 0; right: 0; height: 1px;background: linear-gradient(to right, transparent, var(--gold-dim), transparent);}/* 星空装飾 */.sec-gokusai::after {content: '';position: absolute; inset: 0;background:radial-gradient(1px 1px at 20% 25%, rgba(255,255,255,0.35) 0%, transparent 100%),radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.25) 0%, transparent 100%),radial-gradient(1px 1px at 80% 40%, rgba(255,255,255,0.3)  0%, transparent 100%),radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.2)  0%, transparent 100%),radial-gradient(1px 1px at 10% 60%, rgba(255,255,255,0.3)  0%, transparent 100%);pointer-events: none;z-index: 0;}.sec-gokusai .sec-inner { position: relative; z-index: 1; padding: 0 24px; }.sec-eyebrow {font-family: 'Shippori Mincho', serif;font-size: 11px;font-weight: 600;letter-spacing: 0.55em;color: var(--gold);margin-bottom: 28px;display: block;opacity: 0.85;}/* 極彩律メインカード */.gokusai-card {background: var(--navy-card);border: 1px solid var(--gold-line);border-radius: 16px;padding: 36px 28px;margin-bottom: 12px;position: relative;overflow: hidden;}.gokusai-card::before {content: '';position: absolute; top: 0; left: 0; right: 0; height: 2px;background: linear-gradient(to right, transparent, var(--gold), transparent);}.type-name {font-family: 'Shippori Mincho', serif;font-size: clamp(36px, 9vw, 54px);font-weight: 300; letter-spacing: 0.2em;line-height: 1.2; margin-bottom: 10px;}.type-reading {font-family: 'Cormorant Garamond', serif;font-style: italic;font-size: 15px; letter-spacing: 0.25em;color: var(--gold); opacity: 0.75;margin-bottom: 16px;}.type-divider {width: 40px; height: 1px;background: var(--gold-dim);margin-bottom: 24px;}.type-desc {font-size: 15px; line-height: 2.4;color: rgba(232,228,220,0.88);letter-spacing: 0.06em;}/* 属性グリッド */.attr-grid {display: grid;grid-template-columns: 1fr 1fr;gap: 8px;margin-top: 24px;}.attr-item {background: rgba(200,168,74,0.06);border: 1px solid var(--gold-line);border-radius: 8px;padding: 12px 14px;}.attr-label {font-size: 9px; letter-spacing: 0.25em;color: var(--gold); opacity: 0.7;margin-bottom: 4px;display: block;}.attr-value {font-family: 'Shippori Mincho', serif;font-size: 14px; letter-spacing: 0.15em;color: var(--text);}/* 強み・意識カード */.strength-card {background: var(--navy-card2);border: 1px solid var(--gold-line);border-radius: 12px;padding: 24px 24px;margin-bottom: 8px;}.strength-title {font-size: 10px; letter-spacing: 0.4em;color: var(--gold); opacity: 0.7;margin-bottom: 14px;display: block;}.strength-body {font-size: 14px; line-height: 2.4;color: rgba(232,228,220,0.82);letter-spacing: 0.06em;}/* タイプカラー */.c-ao      { color: #7bbedd; }.c-midori  { color: #72c490; }.c-kohaku  { color: #d4a030; }.c-kurenai { color: #cc6870; }.c-sumire  { color: #a888d8; }/* 極彩律画像 */.gokusai-img-wrap { text-align: center; margin-bottom: 28px; }.gokusai-img {width: 140px; height: 140px;object-fit: cover;border-radius: 50%;display: none;box-shadow: 0 0 40px rgba(200,168,74,0.12);border: 1px solid var(--gold-line);}/* セクション区切り */.sec-sep {width: 1px; height: 40px;background: linear-gradient(to bottom, transparent, var(--gold-dim), transparent);margin: 4px auto;}/* ===== 月相セクション ===== */.sec-gessho {background: linear-gradient(180deg, #07101e 0%, #060c1a 100%);padding: 48px 0 32px;position: relative;overflow: hidden;}.sec-gessho::before {content: '';position: absolute; top: 0; left: 0; right: 0; height: 1px;background: linear-gradient(to right, transparent, rgba(150,180,255,0.25), transparent);}/* 星空背景 */.sec-gessho::after {content: '';position: absolute; inset: 0;background:radial-gradient(ellipse 80% 60% at 50% 100%, rgba(10,20,60,0.7) 0%, transparent 70%),radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),radial-gradient(1px 1px at 35% 45%, rgba(255,255,255,0.3) 0%, transparent 100%),radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),radial-gradient(1px 1px at 75% 35%, rgba(255,255,255,0.3) 0%, transparent 100%),radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,0.4) 0%, transparent 100%);pointer-events: none; z-index: 0;}.sec-gessho .sec-inner { position: relative; z-index: 1; padding: 0 24px; }/* 月相メインカード */.gessho-card {background: rgba(8,16,36,0.85);border: 1px solid rgba(150,180,255,0.18);border-radius: 16px;padding: 32px 24px;margin-bottom: 12px;position: relative;}.gessho-card::before {content: '';position: absolute; top: 0; left: 0; right: 0; height: 2px;background: linear-gradient(to right, transparent, rgba(150,180,255,0.4), transparent);}.gessho-tcs-badge {display: inline-block;font-size: 10px; letter-spacing: 0.25em;color: #d08070; border: 1px solid rgba(208,128,112,0.35);padding: 4px 14px; border-radius: 20px;margin-bottom: 20px;}.gessho-moon {font-size: 64px; line-height: 1;margin-bottom: 16px;display: block;filter: drop-shadow(0 0 20px rgba(180,200,255,0.3));}.gessho-name {font-family: 'Shippori Mincho', serif;font-size: clamp(28px, 7vw, 40px);font-weight: 300; letter-spacing: 0.25em;margin-bottom: 8px; color: #d8e4ff;}.gessho-name.is-tcs { color: #d08878; }.gessho-reading {font-family: 'Shippori Mincho', serif;font-style: italic; font-weight: 300;font-size: 15px; letter-spacing: 0.35em;color: rgba(180,200,255,0.45);margin-bottom: 20px;}.gessho-divider {width: 40px; height: 1px;background: rgba(180,200,255,0.15);margin-bottom: 24px;}.gessho-desc {font-size: 15px; line-height: 2.4;color: rgba(210,220,255,0.88);letter-spacing: 0.06em;}/* 月相サイクルカード */.gessho-cycle-card {background: rgba(8,16,36,0.7);border: 1px solid rgba(150,180,255,0.12);border-radius: 12px;padding: 20px 24px;text-align: center;}/* ===== 使命石セクション ===== */.sec-stone {background: linear-gradient(180deg, #060c1a 0%, #07101e 100%);padding: 48px 0 32px;position: relative;}.sec-stone::before {content: '';position: absolute; top: 0; left: 0; right: 0; height: 1px;background: linear-gradient(to right, transparent, var(--gold-dim), transparent);}.sec-stone .sec-inner { padding: 0 24px; }/* 使命石カード */.stone-card {background: var(--navy-card);border: 1px solid var(--gold-line);border-radius: 16px;padding: 28px 24px;margin-bottom: 8px;}.stone-name {font-family: 'Shippori Mincho', serif;font-size: clamp(22px, 6vw, 30px);font-weight: 400; letter-spacing: 0.2em;margin-bottom: 6px;}.stone-mineral {font-size: 12px; letter-spacing: 0.2em;color: rgba(232,228,220,0.55); margin-bottom: 4px;}.stone-color-label {font-size: 12px; letter-spacing: 0.15em;color: rgba(200,168,74,0.65); margin-bottom: 20px;}.stone-keywords-row {display: flex; flex-wrap: wrap; gap: 6px;margin-bottom: 20px;}.stone-keyword-tag {font-size: 11px; letter-spacing: 0.15em;color: var(--gold); opacity: 0.85;border: 1px solid var(--gold-line);padding: 4px 12px; border-radius: 20px;}.stone-divider {width: 40px; height: 1px;background: var(--gold-line);margin-bottom: 18px;}.stone-nature {font-size: 14px; line-height: 2.3;color: rgba(232,228,220,0.82);letter-spacing: 0.06em;}/* 響合数 */.sec-kyogo {background: linear-gradient(180deg, #07101e 0%, #060c1a 100%);padding: 40px 0 24px;position: relative;display: none;}.sec-kyogo::before {content: '';position: absolute; top: 0; left: 0; right: 0; height: 1px;background: linear-gradient(to right, transparent, rgba(153,128,200,0.25), transparent);}.sec-kyogo .sec-inner { padding: 0 24px; }.kyogo-card {background: rgba(20,10,40,0.8);border: 1px solid rgba(168,136,216,0.22);border-radius: 16px;padding: 28px 24px;}.kyogo-badge {display: inline-block;font-size: 10px; letter-spacing: 0.25em;color: #a888d8; border: 1px solid rgba(168,136,216,0.3);padding: 4px 14px; border-radius: 20px;margin-bottom: 16px;}.kyogo-title {font-family: 'Shippori Mincho', serif;font-size: 20px; font-weight: 400;letter-spacing: 0.2em; color: #c0a8e8;margin-bottom: 16px;}.kyogo-desc {font-size: 14px; line-height: 2.3;color: rgba(210,200,240,0.82);letter-spacing: 0.06em;}/* ===== CTA 3枚カード ===== */.sec-cta {background: linear-gradient(180deg, #060c1a 0%, #0a1428 100%);padding: 48px 0 56px;position: relative;}.sec-cta::before {content: '';position: absolute; top: 0; left: 0; right: 0; height: 1px;background: linear-gradient(to right, transparent, var(--gold-dim), transparent);}.sec-cta .sec-inner { padding: 0 24px; }.cta-head {text-align: center;margin-bottom: 32px;}.cta-head-title {font-family: 'Shippori Mincho', serif;font-size: 15px; line-height: 2.2;letter-spacing: 0.12em;color: rgba(232,228,220,0.75);}.cta-cards {display: flex;flex-direction: column;gap: 12px;}.cta-card {background: var(--navy-card);border: 1px solid var(--gold-line);border-radius: 14px;padding: 24px 20px;text-decoration: none;display: block;transition: background 0.25s, border-color 0.25s;}.cta-card:hover {background: rgba(200,168,74,0.06);border-color: rgba(200,168,74,0.35);}.cta-card-icon {font-size: 20px; margin-bottom: 8px;display: block;}.cta-card-label {font-size: 9px; letter-spacing: 0.4em;color: var(--gold); opacity: 0.7;margin-bottom: 6px; display: block;}.cta-card-title {font-family: 'Shippori Mincho', serif;font-size: 16px; letter-spacing: 0.15em;color: var(--text);margin-bottom: 8px;}.cta-card-body {font-size: 13px; line-height: 2.1;color: rgba(232,228,220,0.6);letter-spacing: 0.05em;}.cta-closing {text-align: center;margin-top: 36px;font-family: 'Shippori Mincho', serif;font-size: 14px; line-height: 2.4;color: rgba(232,228,220,0.5);letter-spacing: 0.1em;font-style: italic;}/* ===== フッター ===== */.footer-area {background: var(--navy-deep);padding: 48px 24px;text-align: center;border-top: 1px solid var(--gold-line);}.btn-reset {padding: 12px 32px;background: transparent;border: 1px solid rgba(200,168,74,0.2);color: var(--muted);font-family: 'Noto Sans JP', sans-serif;font-size: 11px; letter-spacing: 0.4em;cursor: pointer; transition: all 0.25s;border-radius: 6px;}.btn-reset:hover { border-color: var(--gold); color: var(--gold); }.footer-note {font-size: 11px; color: rgba(255,255,255,0.2);letter-spacing: 0.2em; margin-top: 24px;line-height: 2;}.footer-img {width: 100%;height: auto;display: block;margin: 0;border-radius: 0;}/* アニメーション */@keyframes fadeUp {from { opacity: 0; transform: translateY(20px); }to   { opacity: 1; transform: translateY(0); }}.anim { animation: fadeUp 0.7s ease both; }.anim-d1 { animation-delay: 0.1s; }.anim-d2 { animation-delay: 0.2s; }.anim-d3 { animation-delay: 0.3s; }.anim-d4 { animation-delay: 0.4s; }/* result-label 非表示（カード構造に変更） */.result-label { display: none; }/* ===== 月相CTA ===== */.sec-gessho-cta {background: linear-gradient(180deg, #060c1a 0%, #07101e 100%);padding: 8px 0 24px;}.gessho-cta-card {background: rgba(8,16,36,0.7);border: 1px solid rgba(150,180,255,0.15);border-radius: 14px;padding: 28px 24px;}.gessho-cta-lead {font-family: 'Shippori Mincho', serif;font-size: 16px; letter-spacing: 0.15em;color: #d8e4ff; margin-bottom: 10px;}.gessho-cta-body {font-size: 14px; line-height: 2.2;color: rgba(210,220,255,0.65);letter-spacing: 0.06em; margin-bottom: 24px;}.gessho-cta-links { display: flex; flex-direction: column; gap: 12px; }.gessho-cta-link {display: flex; flex-direction: column; gap: 6px;background: rgba(150,180,255,0.06);border: 1px solid rgba(150,180,255,0.15);border-radius: 10px; padding: 16px 18px;text-decoration: none;transition: background 0.25s, border-color 0.25s;}.gessho-cta-link:hover {background: rgba(150,180,255,0.1);border-color: rgba(150,180,255,0.3);}.gessho-cta-link-label {font-size: 11px; letter-spacing: 0.2em;color: #a0b8e8; font-weight: 500;}.gessho-cta-link-body {font-size: 13px; line-height: 2;color: rgba(210,220,255,0.7);letter-spacing: 0.05em;}.gessho-cta-link-btn {font-size: 12px; letter-spacing: 0.2em;color: rgba(150,180,255,0.8);margin-top: 4px;}</style>
+</head>
+<body>
+
+<!-- 入力エリア -->
+<div style="width:100%;overflow:hidden;">
+</div>
+<img class="hero-img" id="hero-img" src="https://i.gyazo.com/072818487d77d7d47d45445811844973.jpg" alt="">
+<div class="hero" id="hero-area">
+  <span class="hero-ornament">Gokusairitsu · 極彩律</span>
+  <div class="hero-title">極彩律診断</div>
+  <p class="hero-sub">あなたの本質の色を知る</p>
+  <div class="divider"></div>
+
+  <div class="input-wrap">
+    <span class="field-label">生 年 月 日</span>
+    <div class="date-row">
+      <div class="date-unit">
+        <span class="unit-label">年</span>
+        <div class="sel-wrap"><select id="sel-y"><option value="">年</option></select></div>
+      </div>
+      <div class="date-unit">
+        <span class="unit-label">月</span>
+        <div class="sel-wrap"><select id="sel-m"><option value="">月</option></select></div>
+      </div>
+      <div class="date-unit">
+        <span class="unit-label">日</span>
+        <div class="sel-wrap"><select id="sel-d"><option value="">日</option></select></div>
+      </div>
+    </div>
+    <p class="input-hint">※ 西暦・新暦でご入力ください</p>
+    <button class="btn-diagnose" onclick="diagnose()"><span>診 断 す る</span></button>
+    <p class="error-msg" id="err">生年月日を正しく選択してください</p>
+  </div>
+</div>
+
+<!-- 結果 -->
+<div id="result">
+
+  <!-- 導入文 -->
+  <div class="sec-intro anim">
+    <div class="sec-inner" style="text-align:center;">
+      <div class="intro-text">
+        <p>あなたには、2つの「時間」が流れています。</p>
+        <p>ひとつは、<br>生まれた日に刻まれた「本質の色」<br>──<strong>極彩律</strong>。<br>生まれ持った才能と性格の核となる、<br>変わることのないあなたの内側です。</p>
+        <p>もうひとつは、<br>今あなたがいる12年の旅の一地点<br>──<strong>月相</strong>。<br>12年で巡る人生のリズムが、<br>あなたの行動・環境・現実を動かしています。</p>
+        <p>本質の色を知り、運気の波を読む。<br>その2つが重なるとき、<br>今のあなたが見えてくる。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 極彩律 -->
+  <div class="sec-gokusai anim">
+    <div class="sec-inner">
+      <div class="sec-badge"><span class="sec-badge-num">01</span>極 彩 律</div>
+
+      <!-- メインカード -->
+      <div class="gokusai-card">
+        <div class="gokusai-img-wrap">
+          <img id="g-img" class="gokusai-img" src="" alt="">
+        </div>
+        <div class="type-name" id="g-name"></div>
+        <div class="type-reading" id="g-reading"></div>
+        <div class="type-divider"></div>
+        <div class="type-desc" id="g-desc"></div>
+        <!-- 属性グリッド（JS側で動的生成） -->
+        <div class="attr-grid" id="g-attrs"></div>
+      </div>
+
+      <!-- 強み・意識カード -->
+      <div class="strength-card" id="g-strength-wrap" style="display:none;">
+        <span class="strength-title">▸ あなたの強み</span>
+        <div class="strength-body" id="g-strength"></div>
+      </div>
+      <div class="strength-card" id="g-caution-wrap" style="display:none;">
+        <span class="strength-title">▸ 意識したいこと</span>
+        <div class="strength-body" id="g-caution"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-sep anim"></div>
+
+  <!-- 02 使命石 -->
+  <div class="sec-stone anim anim-d2">
+    <div class="sec-inner">
+      <div class="sec-badge"><span class="sec-badge-num">03</span>使 命 石</div>
+
+      <div class="stone-card">
+        <div class="stone-name" id="s-name"></div>
+        <div class="stone-mineral" id="s-mineral"></div>
+        <div class="stone-color-label" id="s-color"></div>
+        <div class="stone-keywords-row" id="s-keywords-row"></div>
+        <div class="stone-divider"></div>
+        <div class="stone-nature" id="s-nature"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 響合数（該当者のみ） -->
+  <div class="sec-kyogo anim anim-d2" id="sec-kyogo">
+    <div class="sec-inner">
+      <div class="sec-badge"><span class="sec-badge-num">04</span>響 合 数</div>
+      <div class="kyogo-card">
+        <div class="kyogo-badge" id="k-badge"></div>
+        <div class="kyogo-title" id="k-title"></div>
+        <div class="kyogo-desc">生まれた瞬間に、時間の数字と魂の周波数が完璧に響き合った特別な人。思い・言葉・行動をシンクロさせる力が人一倍強い、眠れるカリスマ。自分の放つ音を正しく調律すれば、人生は激変していきます。</div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="sec-sep anim"></div>
+
+  <!-- 03 月相 -->
+  <div class="sec-gessho anim anim-d2" id="sec-gessho">
+    <div class="sec-inner">
+      <div class="sec-badge"><span class="sec-badge-num">03</span>月 相 ｜ 現在地</div>
+
+      <div class="gessho-card">
+        <div id="gs-tcs-wrap"></div>
+        <span class="gessho-moon" id="gs-moon"></span>
+        <div class="gessho-name" id="gs-name"></div>
+        <div class="gessho-reading" id="gs-reading"></div>
+        <div class="gessho-divider"></div>
+        <div class="gessho-desc" id="gs-desc"></div>
+      </div>
+
+      <!-- 円形サイクル図カード（非表示） -->
+      <div class="gessho-cycle-card" style="display:none;">
+        <canvas id="gessho-wheel" width="280" height="280" style="display:block;margin:0 auto;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 月相CTA -->
+  <div class="sec-gessho-cta anim">
+    <div class="sec-inner" style="padding:0 24px; text-align:center;">
+      <p style="font-family:'Shippori Mincho',serif; font-size:15px; line-height:2.4; letter-spacing:0.1em; color:rgba(232,228,220,0.75);">あなたの「色」と「現在地」が、<br>少し見えてきたのではないでしょうか。</p>
+      <p style="font-family:'Shippori Mincho',serif; font-size:14px; line-height:2.4; letter-spacing:0.1em; color:rgba(232,228,220,0.5); margin-top:16px; font-style:italic;">この時期をどう乗りこなすか——<br>その地図は、まだここにはありません。</p>
+    </div>
+  </div>
+
+  <div class="sec-sep anim"></div>
+
+  <!-- CTA -->
+  <div class="sec-cta anim anim-d3">
+    <div class="sec-inner">
+      <div class="cta-head">
+        <div class="cta-head-title">もっと深く知りたいあなたへ</div>
+      </div>
+      <div class="cta-cards">
+        <div class="cta-card cta-card-about">
+          <span class="cta-card-icon">✦</span>
+          <span class="cta-card-label">ABOUT</span>
+          <div class="cta-card-title">極彩律とは</div>
+          <div class="cta-card-body">極彩律は、一般的な占いとは少し違います。<br><br>古来より伝わる複数の占術を元に編み直した、あなた固有の「色」と「リズム」を読む羅針盤。<br><br>運気の波を先読みして、人生の追い風を味方につける。タイミングを知っていると、同じ行動でも結果が変わってくる。<br><br>生まれ持った色は変わらない。でも、その色をどう活かすかは、知っているかどうかで大きく変わります。</div>
+        </div>
+        <a href="https://note.com/gokusairitsu" target="_blank" class="cta-card">
+          <span class="cta-card-icon">🌙</span>
+          <span class="cta-card-label">NOTE</span>
+          <div class="cta-card-title">コラム・週次サイクル</div>
+          <div class="cta-card-body">運気の波は、知っていれば先読みできる。日別・週別のグラフで動くべき日・整える日が一目で分かる、チャンスの波に乗るためのあなただけの人生の天気予報です。</div>
+        </a>
+        <a href="#" class="cta-card">
+          <span class="cta-card-icon">◎</span>
+          <span class="cta-card-label">READING</span>
+          <div class="cta-card-title">個別鑑定のご案内</div>
+          <div class="cta-card-body">より深く読み解く。あなた専用の羅針盤を手にしてください。本質の深掘りから月相の詳細な流れ、恋愛・相性まで、あなたのテーマに合わせた鑑定メニューをご用意しています。</div>
+        </a>
+      </div>
+      <div class="cta-closing">
+        現実は、正しいタイミングに、<br>
+        正しい方向へ動けば、<br>
+        面白いように動き始めます。
+      </div>
+    </div>
+  </div>
+
+  <!-- フッター -->
+  <div style="width:100%;overflow:hidden;">
+</div>
+<img class="footer-img" src="https://i.gyazo.com/f05965368a2bd18e41a454e435278f7c.jpg" alt="">
+<div class="footer-area anim anim-d4">
+    <button class="btn-reset" onclick="reset()">← もう一度診断する</button>
+    <p class="footer-note">極彩律占い Lani ｜ © 極彩律 All Rights Reserved.</p>
+  </div>
+
+</div>
+
+<script>const _a = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const _b = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const _c = [
+{ img:'ao_hibiki',      name:'蒼の響', reading:'あおのひびき',       c:'c-ao',
+desc:'あなたの強さは、静かです。声高に主張しない。争いを好まない。でも、誰よりも深いところに揺るがない芯を持っている。時間はあなたの味方。年齢を重ねるほどに、実力も信頼も魅力も、確かな重みを持って積み上がっていきます。' },
+{ img:'ao_nagi',        name:'蒼の凪', reading:'あおのなぎ',          c:'c-ao',
+desc:'柔らかく、しなやかで、どんな環境にあっても自分らしさを失わない。風に揺れても、根は抜けない。誰とでも自然に打ち解けられる社交性の奥に、誰にも曲げられない芯がしっかりと宿っています。多くの人の中でこそ、あなたの力は輝きます。' },
+{ img:'midori_hibiki',  name:'翠の響', reading:'みどりのひびき',    c:'c-midori',
+desc:'あなたがいるだけで、場が明るくなる。無邪気で、おおらかで、感情のままに動いていく。行動的で、情にもろく、気前がいい。あなたの笑顔と明るいエネルギーが、周りの人にとっての潤滑油になっています。' },
+{ img:'midori_nagi',    name:'翠の凪', reading:'みどりのなぎ',      c:'c-midori',
+desc:'穏やかな外見の奥に、静かに燃え続ける火種がある。礼儀正しく、控えめで、思いやりがある。でも内側にはいつも熱いものが流れていて、縁のある人にはとことん親身になって尽くします。そのギャップを知る人ほど、あなたを深く信頼します。' },
+{ img:'kohaku_hibiki',  name:'琥珀の響', reading:'こはくのひびき',  c:'c-kohaku',
+desc:'あなたは、揺るがない人。急がない。焦らない。面倒見がよく、愛情深く、奉仕の心がある。現実志向で着実で、一歩ずつ確かめながら前進するから、気づけば誰より遠くに来ている。そんな人です。' },
+{ img:'kohaku_nagi',    name:'琥珀の凪', reading:'こはくのなぎ',    c:'c-kohaku',
+desc:'あなたは、受け入れる人。良いものも、悪いものも、すべてを飲み込んで自分の栄養にしていく力がある。庶民的で気さくで、誰からも好感を持たれる。でも内側はそれほど単純じゃない。芯の強さと自立心が、あなたをただのお人好しにはさせません。' },
+{ img:'kurenai_hibiki', name:'紅の響', reading:'くれないのひびき',   c:'c-kurenai',
+desc:'あなたは、打たれるほどに強くなる人。正直で、一本気で、行動力がある。正しいと思ったことには損得勘定抜きでまっすぐに突き進む。その正義感と勇気が、あなたを唯一無二の存在にしています。' },
+{ img:'kurenai_nagi',   name:'紅の凪', reading:'くれないのなぎ',     c:'c-kurenai',
+desc:'あなたは、磨かれるほどに輝く人。生まれ持った感性の鋭さ、美しいものへの憧れ、優雅でありたいという願望——それはわがままではなく、あなたの本質が持つ正直な声。自分を磨くことで、可能性はどこまでも広がっていきます。' },
+{ img:'sumire_hibiki',  name:'菫の響', reading:'すみれのひびき',    c:'c-sumire',
+desc:'あなたは、果てを知らない人。広くて、深くて、自由で、どこへでも流れていける。大きなものを飲み込む包容力と、止まることを知らない好奇心があなたの本質。幸運は自分の実力で、自分の手でつかむもの。それが菫の響の法則です。' },
+{ img:'sumire_nagi',    name:'菫の凪', reading:'すみれのなぎ',      c:'c-sumire',
+desc:'あなたは、静かに浸透していく人。急がなくていい、焦らなくていい。一粒一粒の積み重ねがやがて大きな流れになる。どんな環境にも自然と寄り添える順応性があり、その内側は慈愛にあふれている。続けることが、あなたの武器です。' },
+];
+const _d = {
+ao_hibiki:      'https://i.gyazo.com/b4d93ac1d5311092d00d2bbd356a40b3.png',
+ao_nagi:        'https://i.gyazo.com/5adca4c34127f49e48d61feb0cb08ef5.png',
+midori_hibiki:  'https://i.gyazo.com/5ea5f7e9c0e34fa3a05eb3bfe0d7263f.png',
+midori_nagi:    'https://i.gyazo.com/3eabc1ca2a68b912ccc1528d358854c0.png',
+kohaku_hibiki:  'https://i.gyazo.com/b83c84eb6cdedee61a8bf45b29c63488.png',
+kohaku_nagi:    'https://i.gyazo.com/d5c33c9f0c77c6435dbb241ffa061379.png',
+kurenai_hibiki: 'https://i.gyazo.com/e3b01a456424a85f2e2068e465fb4049.png',
+kurenai_nagi:   'https://i.gyazo.com/8a362c71fe1359d465ebe7c07df1e5fd.png',
+sumire_hibiki:  'https://i.gyazo.com/f82eb803b538fa7f81136135a23fcd6b.png',
+sumire_nagi:    'https://i.gyazo.com/44bf385ce3b31b4a547a1dd1228d7465.png',
+};
+const _e = [
+{ hoshi:'貫索星', stone:'レッドジャスパー',    mineral:'赤碧玉',       color:'落ち着いた不透明な赤',
+keywords:'強い意志・グラウンディング・孤高',
+nature:'あなたの守護石は、大地の奥深くから生まれた赤碧玉です。どんな状況でも揺らがない意志の力を支え、自分の足でしっかりと立ち続けるためのエネルギーを与えてくれます。迷いを感じたときこそ、この石を手にしてください。' },
+{ hoshi:'石門星', stone:'ネフライト',          mineral:'軟玉',         color:'まろやかなセージグリーン',
+keywords:'集団の和・対等な連携・調和',
+nature:'あなたの守護石は、古くから「和の石」と呼ばれてきた軟玉です。人と人の間に流れる見えない繋がりを整え、対等な関係の中で調和を生み出す力を高めてくれます。大切な人と共にいるとき、その場をそっと守ってくれます。' },
+{ hoshi:'鳳閣星', stone:'シトリン',            mineral:'黄水晶',       color:'透明感のあるシトリン・イエロー',
+keywords:'陽気・自然体・ありのままの自己表現',
+nature:'あなたの守護石は、光を内包する黄水晶です。ありのままの自分でいることへの安心感を与え、自然体の表現力を輝かせてくれます。自分らしさを出せないと感じるとき、この石の温かい光を思い出してください。' },
+{ hoshi:'調舒星', stone:'ラブラドライト',      mineral:'曹灰長石',     color:'神秘的な虹色の輝き',
+keywords:'独特の感性・クリエイティブ・インスピレーション',
+nature:'あなたの守護石は、角度によって輝きを変える曹灰長石です。見えないものを感じ取る感性をさらに研ぎ澄まし、インスピレーションの扉を開いてくれます。創造の行き詰まりを感じたとき、この石の虹色を眺めてみてください。' },
+{ hoshi:'禄存星', stone:'パイライト',          mineral:'黄鉄鉱',       color:'金属質のメタリック・ゴールド',
+keywords:'人を惹きつける引力・愛情・華やかさ',
+nature:'あなたの守護石は、黄金色に輝く黄鉄鉱です。豊かさと愛情を引き寄せる引力をさらに高め、与えることで広がるサイクルを後押ししてくれます。その輝きは、あなたの持つ華やかさをさらに際立たせてくれます。' },
+{ hoshi:'司禄星', stone:'スモーキークォーツ',  mineral:'煙水晶',       color:'透明感のあるスモーキー・ブラウン',
+keywords:'堅実・蓄積・安心安定',
+nature:'あなたの守護石は、落ち着いた深みを持つ煙水晶です。地に足のついた現実感覚を高め、着実な積み重ねをしっかりと支えてくれます。焦りや不安を感じるとき、この石の静けさがあなたの心を落ち着かせてくれます。' },
+{ hoshi:'車騎星', stone:'ヘマタイト',          mineral:'赤鉄鉱',       color:'磨かれたメタリック・ブラック',
+keywords:'行動力・スピード・突破力',
+nature:'あなたの守護石は、重厚な輝きを持つ赤鉄鉱です。一瞬の迷いを取り払い、前に進む力を最大限に引き出してくれます。何かを決断しなければならないとき、この石を握ることで体の奥から行動力が湧いてきます。' },
+{ hoshi:'牽牛星', stone:'ソーダライト',        mineral:'方ソーダ石',   color:'マットな濃紺（インクブルー）',
+keywords:'プライド・責任感・理性的な判断力',
+nature:'あなたの守護石は、深い紺色の方ソーダ石です。感情に流されることなく、理性的な判断を下す力を支えてくれます。責任ある選択を求められる場面で、この石の落ち着いた色が冷静さを取り戻させてくれます。' },
+{ hoshi:'龍高星', stone:'フローライト',        mineral:'蛍石',         color:'パープル〜グリーンのグラデーション',
+keywords:'冒険・創造的破壊・自由な放浪',
+nature:'あなたの守護石は、多彩な色を内包する蛍石です。未知への扉を開く冒険心を後押しし、変化を恐れない自由な精神を守ってくれます。新しい環境や挑戦に踏み出すとき、この石があなたの背中を押してくれます。' },
+{ hoshi:'玉堂星', stone:'クリアクォーツ',      mineral:'本水晶',       color:'澄み切ったクリア（完全透明）',
+keywords:'伝統・母性・清廉潔白・思考の浄化',
+nature:'あなたの守護石は、すべての光を通す本水晶です。思考を澄み渡らせ、本質を見極める洞察力を高めてくれます。大切なことを学ぶとき、あるいは誰かを守りたいと感じるとき、この石の透明な輝きがあなたの力になります。' },
+];
+const _f = [
+{ name:'子丑天中殺', shi:[0,1] }, { name:'寅卯天中殺', shi:[2,3] },
+{ name:'辰巳天中殺', shi:[4,5] }, { name:'午未天中殺', shi:[6,7] },
+{ name:'申酉天中殺', shi:[8,9] }, { name:'戌亥天中殺', shi:[10,11] },
+];
+const _g = [5,4,3,2,1,0];
+const _h = 2447350;
+const _i = [
+{ moon:'🌑', name:'陰朔',   reading:'いんさく',     tcs:true,
+desc:'光が消え、内省が始まる静寂の始まりの年です。外へ向かう力を抑え、ただ静かに自分の内側へと潜っていく時期です。焦らなくて大丈夫。この静けさの中で、あなたの次の章への種が静かに宿り始めています。' },
+{ moon:'🌑', name:'極朔',   reading:'ごくさく',   tcs:true,
+desc:'完全なるゼロ地点。すべてがリセットされ、新しい自分へと生まれ変わる準備が整う時期です。何もかもが静止しているように感じるかもしれません。でもその静止の奥に、次の12年を動かす大きなエネルギーが蓄えられています。' },
+{ moon:'🌒', name:'結月',   reading:'むすびづき', tcs:false,
+desc:'種が土の中で静かに根を張り始める時期です。まだ目には見えないけれど、確かな変化があなたの内側で動き始めています。この時期に大切にしたことが、やがて想像以上の形で現れてきます。' },
+{ moon:'🌒', name:'繊月',   reading:'せんげつ',   tcs:false,
+desc:'最初の光が差し込み始める時期です。小さな兆しが、日常のふとした瞬間に現れ始めます。見逃さないでください。この光の向かう先に、あなたにとって大切な何かが待っています。' },
+{ moon:'🌓', name:'三日月', reading:'みかづき',   tcs:false,
+desc:'根が地に張られ、少しずつ芽吹き始める時期です。焦らず、でも着実に。今動かしたものは、思いのほか深いところまで届いていて、この先の流れを大きく変える力を持っています。' },
+{ moon:'🌓', name:'上弦',   reading:'じょうげん', tcs:false,
+desc:'軌道を修正する時期です。ここまでの流れを振り返り、進む方向を確かめる。小さな調整が、この先の大きな差になります。今ここで立ち止まった人だけが見える景色があります。' },
+{ moon:'🌔', name:'盈月',   reading:'えいげつ',   tcs:false,
+desc:'満ちる手前の、微調整の時期です。あともう少し。焦らず丁寧に整えることが、次の大きな波を引き寄せます。この時期を丁寧に過ごした人には、やがて想像を超えた収穫が訪れます。' },
+{ moon:'🌕', name:'望月',   reading:'もちづき',   tcs:false,
+desc:'12年の旅の頂点。あなたの努力と流れが重なり、大きな収穫の季節が訪れる時期です。ただし、この波をどう乗りこなすかによって、その実りの大きさは大きく変わってきます。' },
+{ moon:'🌖', name:'虧月',   reading:'きげつ',     tcs:false,
+desc:'手放しの時期です。執着しているものを手放すほど、次の流れがスムーズになります。怖く感じるかもしれません。でもこの時期に手放したものの先に、あなたを待つ大きな転換期があります。' },
+{ moon:'🌗', name:'下弦',   reading:'かげん',     tcs:false,
+desc:'知恵を還元する時期です。これまでの経験が、誰かの力になる。与えることで、あなた自身も満たされていく循環が生まれます。この時期の「与える」という行動が、次の流れへの扉を開きます。' },
+{ moon:'🌘', name:'有明月', reading:'ありあけづき', tcs:false,
+desc:'財が結晶化する時期です。これまで積み上げてきたものが、静かに形になり始めます。焦らなくていい。この時期に意識しておくべきひとつのことが、その結実をさらに大きくします。' },
+{ moon:'🌘', name:'晦月',   reading:'つごもり',   tcs:false,
+desc:'穏やかな感謝の時期です。旅の終わりに近づきながら、すべてを静かに受け取る季節。この穏やかさの奥に、次の12年への大切な伏線が静かに宿っています。' },
+];
+const _j = [5,6,7,8,9,0,1,2,3,4];
+const _k  = [0,0,1,1,2,2,3,3,4,4];
+const _l   = [0,1,0,1,0,1,0,1,0,1];
+function _m(y,m,d) {
+const a=Math.floor((14-m)/12), Y=y+4800-a, M=m+12*a-3;
+return d+Math.floor((153*M+2)/5)+365*Y+Math.floor(Y/4)-Math.floor(Y/100)+Math.floor(Y/400)-32045;
+}
+function _n(y,m,d) { return ((_m(y,m,d)-1)%10+10)%10; }
+function _o(y,m,d) { return ((_m(y,m,d)-11)%12+12)%12; }
+function _p(y) { return (y-4)%10; }
+function _q(ni,ai) {
+const ng=_k[ni],ag=_k[ai],si=(_l[ni]===_l[ai]);
+if(ng===ag) return si?0:1;
+if((ng===0&&ag===1)||(ng===1&&ag===2)||(ng===2&&ag===3)||(ng===3&&ag===4)||(ng===4&&ag===0)) return si?2:3;
+if((ng===0&&ag===2)||(ng===1&&ag===3)||(ng===2&&ag===4)||(ng===3&&ag===0)||(ng===4&&ag===1)) return si?4:5;
+if((ag===0&&ng===2)||(ag===1&&ng===3)||(ag===2&&ng===4)||(ag===3&&ng===0)||(ag===4&&ng===1)) return si?6:7;
+return si?8:9;
+}
+function _r() {
+const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1,d=now.getDate();
+const ay=(m>2||(m===2&&d>=4))?y:y-1;
+return ((ay-4)%12+12)%12;
+}
+function _s() {
+const sy=document.getElementById('sel-y');
+const sm=document.getElementById('sel-m');
+const sd=document.getElementById('sel-d');
+const cur=new Date().getFullYear();
+for(let y=cur;y>=1900;y--){const o=document.createElement('option');o.value=y;o.textContent=y+'年';sy.appendChild(o);}
+for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.textContent=m+'月';sm.appendChild(o);}
+for(let d=1;d<=31;d++){const o=document.createElement('option');o.value=d;o.textContent=d+'日';sd.appendChild(o);}
+sy.addEventListener('change',_t);
+sm.addEventListener('change',_t);
+}
+function _t() {
+const y=parseInt(document.getElementById('sel-y').value)||2000;
+const m=parseInt(document.getElementById('sel-m').value)||1;
+const sd=document.getElementById('sel-d');
+const cur=sd.value;
+const max=new Date(y,m,0).getDate();
+while(sd.options.length>1) sd.remove(1);
+for(let d=1;d<=max;d++){const o=document.createElement('option');o.value=d;o.textContent=d+'日';sd.appendChild(o);}
+if(cur&&parseInt(cur)<=max) sd.value=cur;
+}
+function diagnose() {
+const y=parseInt(document.getElementById('sel-y').value);
+const m=parseInt(document.getElementById('sel-m').value);
+const d=parseInt(document.getElementById('sel-d').value);
+const err=document.getElementById('err');
+if(!y||!m||!d){err.style.display='block';return;}
+err.style.display='none';
+const colorIdx=_n(y,m,d);
+const yearIdx=_p(y);
+const mapIdx=_j[yearIdx];
+const stoneIdx=_q(colorIdx,mapIdx);
+const type=_c[colorIdx];
+const stone=_e[stoneIdx];
+// 極彩律
+const gn=document.getElementById('g-name');
+gn.textContent=type.name; gn.className='type-name '+type.c;
+document.getElementById('g-reading').textContent=type.reading;
+document.getElementById('g-desc').textContent=type.desc;
+// 極彩律画像
+const gImg=document.getElementById('g-img');
+const gImgUrl=_d[type.img];
+if(gImgUrl){ gImg.src=gImgUrl; gImg.style.display='inline-block'; }
+else { gImg.style.display='none'; }
+// 属性グリッド
+const attrMap = [
+{label:'五行', key:'gogyou'},
+{label:'陰陽', key:'inyo'},
+{label:'エネルギー', key:'energy'},
+{label:'方位', key:'houii'},
+{label:'欲求', key:'desire'},
+{label:'キーワード', key:'keyword'},
+];
+const attrGrid = document.getElementById('g-attrs');
+if(attrGrid && type.attrs) {
+attrGrid.innerHTML = attrMap.map(a =>
+type.attrs[a.key] ? `<div class="attr-item"><span class="attr-label">${a.label}</span><span class="attr-value">${type.attrs[a.key]}</span></div>` : ''
+).join('');
+}
+// 強み・意識（既存のtype.descはそのまま表示中）
+const swEl = document.getElementById('g-strength-wrap');
+const swBody = document.getElementById('g-strength');
+const cwEl = document.getElementById('g-caution-wrap');
+const cwBody = document.getElementById('g-caution');
+if(swEl && type.strength){ swBody.textContent=type.strength; swEl.style.display='block'; }
+if(cwEl && type.caution){ cwBody.textContent=type.caution; cwEl.style.display='block'; }
+// 使命石
+document.getElementById('s-name').textContent=stone.stone;
+document.getElementById('s-mineral').textContent=stone.mineral;
+document.getElementById('s-color').textContent=stone.color;
+// キーワードタグ
+const kwRow = document.getElementById('s-keywords-row');
+if(kwRow){
+kwRow.innerHTML = stone.keywords.split('・').map(k=>
+`<span class="stone-keyword-tag">${k.trim()}</span>`
+).join('');
+}
+document.getElementById('s-nature').textContent=stone.nature;
+// 月相
+const dateNum=_m(y,m,d);
+const cycleNum=((dateNum-_h)%60+60)%60;
+const block=Math.floor((cycleNum-1)%60/10);
+const cycleIdx=_g[block];
+const currentBranch=_r();
+const base=_f[cycleIdx].shi[0];
+const cyclePos=(currentBranch-base+12)%12;
+const gs=_i[cyclePos];
+document.getElementById('gs-moon').textContent=gs.moon;
+const gsName=document.getElementById('gs-name');
+gsName.textContent=gs.name;
+gsName.className='gessho-name'+(gs.tcs?' is-tcs':'');
+document.getElementById('gs-reading').textContent = gs.reading || '';
+document.getElementById('gs-desc').textContent=gs.desc;
+// 円形サイクル図
+_v(cyclePos, gs.tcs);
+// 響合数
+const rA=(m===d);
+const l2=y%100;
+const ds=Math.floor(l2/10)+(l2%10);
+const rB=(ds>0&&d===ds);
+const kyogoSec=document.getElementById('sec-kyogo');
+if(rA||rB){
+kyogoSec.style.display='block';
+const isSo=rA&&rB;
+document.getElementById('k-badge').textContent=isSo?'双響合':'響合数あり';
+document.getElementById('k-title').textContent=isSo?'双響合の持ち主です。':'響合数の持ち主です。';
+} else {
+kyogoSec.style.display='none';
+}
+// 表示
+document.getElementById('hero-area').style.display='none';
+document.getElementById('hero-img').style.display='none';
+const res=document.getElementById('result');
+res.style.display='block';
+window.scrollTo({top:0,behavior:'smooth'});
+}
+function _v(currentPos, isTcs) {
+const canvas = document.getElementById('gessho-wheel');
+if (!canvas) return;
+const dpr = window.devicePixelRatio || 1;
+const SIZE = 280;
+canvas.width  = SIZE * dpr;
+canvas.height = SIZE * dpr;
+canvas.style.width  = SIZE + 'px';
+canvas.style.height = SIZE + 'px';
+const ctx = canvas.getContext('2d');
+ctx.scale(dpr, dpr);
+const cx = SIZE / 2, cy = SIZE / 2;
+const phases = _i;
+const total = phases.length;
+phases.forEach((g, i) => {
+const isCurrent = i === currentPos;
+// 角度：12時から時計回り
+const angle = (i / total) * Math.PI * 2 - Math.PI / 2;
+if (isCurrent) {
+// 現在地：大きく強調
+const r = 95;
+const px = cx + Math.cos(angle) * r;
+const py = cy + Math.sin(angle) * r;
+// 光輪
+const grd = ctx.createRadialGradient(px, py, 0, px, py, 28);
+const hlColor = g.tcs ? 'rgba(192,104,96,' : 'rgba(180,200,255,';
+grd.addColorStop(0, hlColor + '0.25)');
+grd.addColorStop(1, hlColor + '0)');
+ctx.beginPath();
+ctx.arc(px, py, 28, 0, Math.PI * 2);
+ctx.fillStyle = grd;
+ctx.fill();
+// 円
+ctx.beginPath();
+ctx.arc(px, py, 18, 0, Math.PI * 2);
+ctx.fillStyle = g.tcs ? 'rgba(192,104,96,0.15)' : 'rgba(80,100,160,0.2)';
+ctx.fill();
+ctx.strokeStyle = g.tcs ? '#c06860' : 'rgba(180,200,255,0.6)';
+ctx.lineWidth = 1.5;
+ctx.stroke();
+// 月の絵文字
+ctx.font = '20px serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText(g.moon, px, py - 1);
+// 名前
+ctx.font = `bold 11px 'Noto Sans JP', sans-serif`;
+ctx.fillStyle = g.tcs ? '#c06860' : '#d8e4ff';
+ctx.fillText(g.name, px, py + 26);
+} else {
+// その他：小さく表示
+const r = 95;
+const px = cx + Math.cos(angle) * r;
+const py = cy + Math.sin(angle) * r;
+ctx.font = '13px serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.globalAlpha = 0.35;
+ctx.fillText(g.moon, px, py);
+ctx.globalAlpha = 1;
+}
+});
+// 中央ライン（薄い円）
+ctx.beginPath();
+ctx.arc(cx, cy, 95, 0, Math.PI * 2);
+ctx.strokeStyle = 'rgba(180,200,255,0.08)';
+ctx.lineWidth = 1;
+ctx.stroke();
+// 中央テキスト
+ctx.font = `10px 'Noto Sans JP', sans-serif`;
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillStyle = 'rgba(180,200,255,0.2)';
+ctx.fillText('12年サイクル', cx, cy);
+}
+function reset() {
+document.getElementById('result').style.display='none';
+document.getElementById('hero-area').style.display='block';
+document.getElementById('hero-img').style.display='block';
+['sel-y','sel-m','sel-d'].forEach(id=>document.getElementById(id).value='');
+window.scrollTo({top:0,behavior:'smooth'});
+}
+_s();</script>
+</body>
+</html>
